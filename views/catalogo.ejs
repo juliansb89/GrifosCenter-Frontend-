@@ -1,0 +1,107 @@
+<%- include('partials/header') %>
+
+<div class="page-header" style="text-align: center; margin-bottom: 3rem;">
+    <h1 class="text-gradient" style="font-size: 2.5rem; margin-bottom: 0.5rem;">Catálogo de Grifos, Accesorios y mucho más</h1>
+    <p style="color: var(--secondary-color); max-width: 600px; margin: 0 auto;">Explora nuestra colección premium diseñada para transformar tus espacios.</p>
+</div>
+
+<!-- Promo Carousel E-commerce -->
+<div class="promo-banner animate-fade-in-up" style="position: relative;">
+    <div class="promo-carousel" id="promoCarousel">
+        <div class="carousel-slide" style="background: url('/img/banner_cyber.png') center/cover;"></div>
+        <div class="carousel-slide" style="background: url('/img/banner_ofertas.png') center/cover;">
+            <div style="background: rgba(0,0,0,0.5); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <h2 style="color: white; font-size: 3rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">NUEVA COLECCIÓN - Vanguardia</h2>
+            </div>
+        </div>
+        <div class="carousel-slide" style="background: url('/img/login_bg.png') center/cover;">
+            <div style="background: rgba(0,0,0,0.5); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <h2 style="color: white; font-size: 3rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">COMBOS EXCLUSIVOS - Instalación Gratis</h2>
+            </div>
+        </div>
+    </div>
+    <div class="carousel-indicators">
+        <div class="carousel-dot active" onclick="scrollToSlide(0)"></div>
+        <div class="carousel-dot" onclick="scrollToSlide(1)"></div>
+        <div class="carousel-dot" onclick="scrollToSlide(2)"></div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 2rem; margin-top: 4rem;">
+    <h2>Nuestras Categorías</h2>
+    <p class="text-secondary">Selecciona una categoría para ver todos los productos disponibles.</p>
+</div>
+
+<!-- Buscador Inteligente de Categorías -->
+<div style="max-width: 600px; margin: 0 auto 3rem auto; position: relative;">
+    <input type="text" id="searchInputCategorias" placeholder="Buscar categorías... (Ej: grifos, cocinas, tina)" onkeyup="filtrarCategorias()" style="width: 100%; padding: 1rem 1.5rem 1rem 3rem; border-radius: 50px; border: 1px solid var(--border-color); font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s;">
+    <i class="fas fa-search" style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--secondary-color); font-size: 1.2rem;"></i>
+</div>
+
+<div class="catalogo-grid animate-fade-in-up delay-100" style="margin-bottom: 4rem;">
+    <% if (categorias && categorias.length > 0) { %>
+        <% categorias.forEach(cat => { 
+            // Asignar imágenes locales según el ID de la categoría
+            let catImg = '/img/cat_lavamanos.png'; // Imagen por defecto
+            if (cat.id_categoria == 1) catImg = '/img/cat_banos.png';
+            if (cat.id_categoria == 2) catImg = '/img/cat_cocinas.png';
+            if (cat.id_categoria == 3) catImg = '/img/bathtub_spa.png';
+            if (cat.id_categoria == 4) catImg = '/img/cat_duchas.png';
+            if (cat.id_categoria == 5) catImg = '/img/Extractor.jpeg';
+        %>
+            <a href="/categoria/<%= cat.id_categoria %>" class="product-card catalog-category-searchable" data-search="<%= (cat.nombre || '').toLowerCase() %> <%= (cat.descripcion || '').toLowerCase() %>" style="text-decoration: none; display: block;">
+                <div class="product-image" style="height: 280px; overflow: hidden;">
+                    <img src="<%= catImg %>" alt="<%= cat.nombre %>" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="product-info" style="text-align: center; padding: 2rem;">
+                    <h3 class="product-title" style="font-size: 1.5rem; margin-bottom: 0.5rem;"><%= cat.nombre %></h3>
+                    <p class="text-secondary"><%= cat.descripcion %></p>
+                    <div style="margin-top: 1.5rem;">
+                        <span class="btn btn-outline" style="border-radius: 30px;">Ver Productos &rarr;</span>
+                    </div>
+                </div>
+            </a>
+        <% }) %>
+    <% } %>
+</div>
+
+<script>
+    // Lógica simple del Carrusel
+    const carousel = document.getElementById('promoCarousel');
+    const dots = document.querySelectorAll('.carousel-dot');
+    let currentSlide = 0;
+
+    function scrollToSlide(index) {
+        const slideWidth = carousel.clientWidth;
+        carousel.scrollTo({ left: slideWidth * index, behavior: 'smooth' });
+        
+        dots.forEach(dot => dot.classList.remove('active'));
+        dots[index].classList.add('active');
+        currentSlide = index;
+    }
+
+    // Auto rotación del carrusel cada 5 segundos
+    setInterval(() => {
+        let nextSlide = (currentSlide + 1) % dots.length;
+        scrollToSlide(nextSlide);
+    }, 5000);
+
+    function filtrarCategorias() {
+        const query = document.getElementById('searchInputCategorias').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.catalog-category-searchable');
+        
+        let hasVisible = false;
+        
+        cards.forEach(card => {
+            const searchData = card.getAttribute('data-search') || '';
+            if (searchData.includes(query)) {
+                card.style.display = 'block';
+                hasVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+<%- include('partials/footer') %>

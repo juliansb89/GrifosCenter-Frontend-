@@ -1,0 +1,309 @@
+<%- include('partials/header') %>
+
+<div class="page-header" style="text-align: center; margin-top: 2rem;">
+    <h1 class="text-gradient">Mi Carrito de Compras</h1>
+    <p>Revisa tus productos antes de proceder al pago seguro.</p>
+</div>
+
+<div class="cart-layout">
+    
+    <!-- Columna Izquierda: Productos -->
+    <div class="cart-items-container" id="carrito-items">
+        <p class="text-center" style="padding: 2rem;">Cargando tu carrito...</p>
+    </div>
+
+    <!-- Columna Derecha: Resumen -->
+    <div class="cart-summary">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">Resumen de la Orden</h3>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--secondary-color);">¿Tienes un cupón?</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="cupon-input" class="form-control" placeholder="Código" style="border-radius: var(--radius-md);">
+                <button class="btn btn-outline btn-primary" style="padding: 0.5rem 1rem;" onclick="aplicarCupon()">Aplicar</button>
+            </div>
+            <p id="cupon-mensaje" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"></p>
+        </div>
+
+        <div style="border-top: 1px dashed var(--border-color); padding-top: 1.5rem; margin-bottom: 2rem;">
+            <p style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--secondary-color);">
+                <span>Subtotal</span>
+                <span id="resumen-subtotal">$0</span>
+            </p>
+            <p style="display: flex; justify-content: space-between; margin-bottom: 1rem; color: var(--danger); font-weight: 500;">
+                <span>Descuento</span>
+                <span id="resumen-descuento">-$0</span>
+            </p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 1rem;">
+                <h3 style="margin: 0; color: var(--text-primary);">Total</h3>
+                <h2 id="carrito-total" class="text-gradient" style="margin: 0; font-size: 2.2rem;">$0</h2>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; padding: 1.2rem; font-size: 1.1rem; border-radius: var(--radius-md); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); display: flex; justify-content: center; align-items: center; gap: 0.5rem;" onclick="abrirModalPago()">
+            Proceder al Pago Seguros 🔒
+        </button>
+        <div style="text-align: center; margin-top: 1rem;">
+            <button class="btn btn-outline btn-danger btn-sm" style="border: none;" onclick="vaciarCarrito()">Vaciar Carrito</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pago Simulado -->
+<div id="payment-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div class="modal-content animate-fade-in-up" style="background: var(--surface-color); margin: auto; padding: 2.5rem; border: 1px solid var(--border-color); width: 100%; max-width: 450px; border-radius: var(--radius-lg); position: relative; box-shadow: var(--shadow-lg);">
+        <span onclick="cerrarModalPago()" style="position: absolute; top: 1rem; right: 1.5rem; color: var(--text-secondary); font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--text-primary); margin-bottom: 0.5rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                Pasarela de Pago Segura
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Grifos Center Checkout (Demo)</p>
+        </div>
+
+        <form id="payment-form" onsubmit="event.preventDefault(); procesarPagoFinal();">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary); font-weight: bold;">Selecciona tu Método de Pago</label>
+                <select id="metodo-pago" class="form-control" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.05); color: var(--text-primary);" onchange="cambiarMetodoPago()">
+                    <option value="tarjeta">💳 Tarjeta de Crédito / Débito</option>
+                    <option value="nequi">📱 Nequi</option>
+                    <option value="pse">🏦 PSE (Transferencia Bancaria)</option>
+                    <option value="paypal">🅿️ PayPal</option>
+                </select>
+            </div>
+
+            <!-- Campos Tarjeta -->
+            <div id="campos-tarjeta">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">Titular de la Tarjeta</label>
+                    <input type="text" id="tarjeta-nombre" class="form-control" required placeholder="EJ: JUAN PEREZ" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">Número de Tarjeta</label>
+                    <div style="position: relative;">
+                        <input type="text" id="tarjeta-numero" class="form-control" required placeholder="4111 1111 1111 1111" maxlength="19" pattern="\d{4} \d{4} \d{4} \d{4}" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);" oninput="this.value = this.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim()">
+                        <span style="position: absolute; right: 10px; top: 10px; font-size: 1.5rem;">💳</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">Expira (MM/YY)</label>
+                        <input type="text" id="tarjeta-expira" class="form-control" required placeholder="12/26" maxlength="5" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">CVV</label>
+                        <input type="password" id="tarjeta-cvv" class="form-control" required placeholder="123" maxlength="4" pattern="\d{3,4}" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos Nequi -->
+            <div id="campos-nequi" style="display: none; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">Número de Celular (Nequi)</label>
+                    <input type="tel" id="nequi-celular" class="form-control" placeholder="300 000 0000" maxlength="10" pattern="[0-9]{10}" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);">
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Te enviaremos una notificación a tu Nequi para aprobar el pago.</p>
+                </div>
+            </div>
+
+            <!-- Campos PSE -->
+            <div id="campos-pse" style="display: none; margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-primary);">Selecciona tu Banco</label>
+                    <select id="pse-banco" class="form-control" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: rgba(0,0,0,0.1); color: var(--text-primary);">
+                        <option value="">Seleccione...</option>
+                        <option value="bancolombia">Bancolombia</option>
+                        <option value="davivienda">Davivienda</option>
+                        <option value="bogota">Banco de Bogotá</option>
+                        <option value="caja_social">Banco Caja Social</option>
+                    </select>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem;">Serás redirigido a la sucursal virtual de tu banco.</p>
+                </div>
+            </div>
+
+            <!-- Campos PayPal -->
+            <div id="campos-paypal" style="display: none; text-align: center; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.9rem; color: var(--text-primary); margin-bottom: 1rem;">Haz clic en el botón de abajo para iniciar sesión en PayPal de forma segura.</p>
+                <div style="background: #003087; color: white; padding: 1rem; border-radius: var(--radius-md); font-weight: bold; font-style: italic;">PayPal</div>
+            </div>
+
+            <button type="submit" id="btn-procesar-pago" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: var(--radius-md); background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                Realizar Pago Seguro
+            </button>
+        </form>
+        
+        <script>
+            function cambiarMetodoPago() {
+                const metodo = document.getElementById('metodo-pago').value;
+                
+                // Ocultar todos
+                document.getElementById('campos-tarjeta').style.display = 'none';
+                document.getElementById('campos-nequi').style.display = 'none';
+                document.getElementById('campos-pse').style.display = 'none';
+                document.getElementById('campos-paypal').style.display = 'none';
+                
+                // Quitar required de tarjeta
+                document.getElementById('tarjeta-nombre').removeAttribute('required');
+                document.getElementById('tarjeta-numero').removeAttribute('required');
+                document.getElementById('tarjeta-expira').removeAttribute('required');
+                document.getElementById('tarjeta-cvv').removeAttribute('required');
+                
+                // Quitar required de otros
+                document.getElementById('nequi-celular').removeAttribute('required');
+                document.getElementById('pse-banco').removeAttribute('required');
+
+                // Mostrar el seleccionado y agregar required
+                if (metodo === 'tarjeta') {
+                    document.getElementById('campos-tarjeta').style.display = 'block';
+                    document.getElementById('tarjeta-nombre').setAttribute('required', 'true');
+                    document.getElementById('tarjeta-numero').setAttribute('required', 'true');
+                    document.getElementById('tarjeta-expira').setAttribute('required', 'true');
+                    document.getElementById('tarjeta-cvv').setAttribute('required', 'true');
+                } else if (metodo === 'nequi') {
+                    document.getElementById('campos-nequi').style.display = 'block';
+                    document.getElementById('nequi-celular').setAttribute('required', 'true');
+                } else if (metodo === 'pse') {
+                    document.getElementById('campos-pse').style.display = 'block';
+                    document.getElementById('pse-banco').setAttribute('required', 'true');
+                } else if (metodo === 'paypal') {
+                    document.getElementById('campos-paypal').style.display = 'block';
+                }
+            }
+        </script>
+    </div>
+</div>
+
+<script>
+let descuentoPorcentaje = 0;
+const formateadorCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+async function aplicarCupon() {
+    const codigo = document.getElementById('cupon-input').value.trim();
+    const mensaje = document.getElementById('cupon-mensaje');
+    
+    if(!codigo) return;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/facturas/cupones/validar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            descuentoPorcentaje = parseFloat(data.descuento_porcentaje);
+            mensaje.style.color = '#10b981'; // Success green
+            mensaje.innerText = `¡Cupón aplicado! ${descuentoPorcentaje}% de descuento`;
+            actualizarTotalVisual();
+        } else {
+            descuentoPorcentaje = 0;
+            mensaje.style.color = 'var(--danger)';
+            mensaje.innerText = 'Cupón inválido o expirado';
+            actualizarTotalVisual();
+        }
+    } catch (error) {
+        mensaje.innerText = 'Error al verificar cupón';
+    }
+}
+
+function actualizarTotalVisual() {
+    let carro = JSON.parse(localStorage.getItem('grifos_carrito')) || [];
+    let subtotal = carro.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    let valorDescuento = subtotal * (descuentoPorcentaje / 100);
+    let totalDesc = subtotal - valorDescuento;
+    
+    const elSubtotal = document.getElementById('resumen-subtotal');
+    if (elSubtotal) elSubtotal.innerText = formateadorCOP.format(subtotal);
+    
+    const elDescuento = document.getElementById('resumen-descuento');
+    if (elDescuento) elDescuento.innerText = '-' + formateadorCOP.format(valorDescuento);
+    
+    const elTotal = document.getElementById('carrito-total');
+    if (elTotal) elTotal.innerText = formateadorCOP.format(totalDesc);
+}
+
+// Interceptar renderizarPaginaCarrito original para inyectar cálculos aquí
+const oldRender = window.renderizarPaginaCarrito;
+if(oldRender) {
+    window.renderizarPaginaCarrito = function() {
+        oldRender();
+        actualizarTotalVisual();
+    }
+}
+
+function abrirModalPago() {
+    let carro = JSON.parse(localStorage.getItem('grifos_carrito')) || [];
+    if(carro.length === 0) {
+        alert("Tu carrito está vacío. Agrega productos primero.");
+        window.location.href = "/catalogo";
+        return;
+    }
+    
+    const isLoggedIn = <%= role ? 'true' : 'false' %>;
+    if (!isLoggedIn) {
+        alert("Debes iniciar sesión para comprar. Por favor, inicia sesión para continuar con tu pago seguro.");
+        window.location.href = "/login";
+        return;
+    }
+
+    const modal = document.getElementById('payment-modal');
+    modal.style.display = 'flex';
+}
+
+function cerrarModalPago() {
+    const modal = document.getElementById('payment-modal');
+    modal.style.display = 'none';
+}
+
+async function procesarPagoFinal() {
+    let carro = JSON.parse(localStorage.getItem('grifos_carrito')) || [];
+    let subtotal = carro.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    let totalFinal = subtotal - (subtotal * (descuentoPorcentaje / 100));
+
+    const btn = document.getElementById('btn-procesar-pago');
+    btn.innerHTML = 'Procesando... 🔄';
+    btn.disabled = true;
+
+    try {
+        const payload = { total: totalFinal, carrito: carro };
+        const codigoCuponUsado = document.getElementById('cupon-input').value.trim();
+        if (descuentoPorcentaje > 0 && codigoCuponUsado) {
+            payload.codigo_cupon = codigoCuponUsado;
+        }
+
+        const response = await fetch('/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            cerrarModalPago();
+            alert(`¡Excelente! Orden #${data.id_factura} procesada con éxito.\nEl pago con tarjeta fue aprobado.`);
+            vaciarCarrito();
+            window.location.href = "/mis-facturas"; // Redirigir a mis-facturas para que vea el rastreo 
+        } else {
+            cerrarModalPago();
+            alert(data.message || "Error al procesar el pago. Por favor inicia sesión.");
+            if (data.message === 'Debes iniciar sesión para comprar') {
+                 window.location.href = "/login";
+            }
+        }
+    } catch (error) {
+        cerrarModalPago();
+        alert("Ocurrió un error al contactar el servidor.");
+    } finally {
+        btn.innerHTML = 'Realizar Pago Seguro';
+        btn.disabled = false;
+    }
+}
+</script>
+
+<%- include('partials/footer') %>

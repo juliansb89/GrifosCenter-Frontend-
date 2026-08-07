@@ -1,0 +1,109 @@
+<%- include('partials/header') %>
+
+<div class="page-header flex-between">
+    <div>
+        <h1><%= title %></h1>
+        <p>Modifica los datos del registro actual.</p>
+    </div>
+    <a href="/<%= modulo %>" class="btn btn-outline">Volver</a>
+</div>
+
+<% if (modulo === 'productos' || modulo === 'empleados' || modulo === 'clientes-admin') { %>
+<div class="card" style="max-width: 1000px; margin: 0 auto;">
+    <form action="/<%= modulo %>/editar/<%= id %>" method="POST" class="form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+            <!-- Izquierda: Previsualización de Imagen o Avatar -->
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-color);">
+                    <%= modulo === 'productos' ? 'Previsualización de Imagen' : 'Perfil' %>
+                </label>
+                <div id="imagePreviewContainer" style="flex-grow: 1; border: 2px dashed var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background-color: #f8f9fa; min-height: 400px;">
+                    <% if (modulo === 'productos') { %>
+                        <div id="imagePlaceholder" style="text-align: center; color: #adb5bd; display: <%= data['imagen_url'] ? 'none' : 'block' %>;">
+                            <span style="font-size: 4rem; display: block; margin-bottom: 1rem;">🖼️</span>
+                            <p>Pega la URL de la imagen para verla aquí</p>
+                        </div>
+                        <img id="imagePreview" src="<%= data['imagen_url'] || '' %>" alt="Vista previa" style="display: <%= data['imagen_url'] ? 'block' : 'none' %>; width: 100%; height: 100%; object-fit: cover;">
+                    <% } else { %>
+                        <div style="text-align: center; color: var(--primary-color);">
+                            <span style="font-size: 8rem; display: block; margin-bottom: 1rem;"><%= modulo === 'empleados' ? '👔' : '👤' %></span>
+                            <h3 style="margin: 0;">Editar <%= modulo === 'empleados' ? 'Empleado' : 'Cliente' %></h3>
+                            <p style="color: var(--secondary-color); margin-top: 0.5rem;"><%= data.nombre_completo || data.nombre %></p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Derecha: Datos del Producto -->
+            <div>
+                <h2 style="margin-bottom: 1.5rem; color: var(--primary-color);">Datos del Producto</h2>
+                <% fields.forEach(field => { %>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="<%= field.name %>" style="font-weight: 600; font-size: 1.1rem;"><%= field.label %></label>
+                        
+                        <% if (field.type === 'select') { %>
+                            <select id="<%= field.name %>" name="<%= field.name %>" <%= field.required ? 'required' : '' %> style="width: 100%; padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.1rem; background-color: white;">
+                                <option value="">Seleccione una opción</option>
+                                <% field.options.forEach(option => { %>
+                                    <option value="<%= option.value || option %>" <%= data && data[field.name] == (option.value || option) ? 'selected' : '' %>><%= option.text || option %></option>
+                                <% }) %>
+                            </select>
+                        <% } else { %>
+                            <input type="<%= field.type %>" id="<%= field.name %>" name="<%= field.name %>" value="<%= data ? data[field.name] : '' %>" <%= field.required ? 'required' : '' %> style="width: 100%; padding: 1rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 1.1rem;" <%= field.name === 'imagen_url' ? 'oninput="updateImagePreview(this.value)"' : '' %>>
+                        <% } %>
+                    </div>
+                <% }) %>
+                
+                <div class="form-group" style="margin-top: 3rem;">
+                    <button type="submit" class="btn btn-primary btn-block" style="font-size: 1.2rem; padding: 1rem;">Actualizar Registro</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function updateImagePreview(url) {
+        const img = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('imagePlaceholder');
+        
+        if (url && url.trim() !== '') {
+            img.src = url;
+            img.style.display = 'block';
+            placeholder.style.display = 'none';
+        } else {
+            img.src = '';
+            img.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+    }
+</script>
+
+<% } else { %>
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form action="/<%= modulo %>/editar/<%= id %>" method="POST" class="form">
+        <% fields.forEach(field => { %>
+            <div class="form-group">
+                <label for="<%= field.name %>"><%= field.label %></label>
+                
+                <% if (field.type === 'select') { %>
+                    <select id="<%= field.name %>" name="<%= field.name %>" <%= field.required ? 'required' : '' %> style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem;">
+                        <option value="">Seleccione una opción</option>
+                        <% field.options.forEach(option => { %>
+                            <option value="<%= option.value || option %>" <%= data[field.name] == (option.value || option) ? 'selected' : '' %>><%= option.text || option %></option>
+                        <% }) %>
+                    </select>
+                <% } else { %>
+                    <input type="<%= field.type %>" id="<%= field.name %>" name="<%= field.name %>" value="<%= data[field.name] || '' %>" <%= field.required ? 'required' : '' %>>
+                <% } %>
+            </div>
+        <% }) %>
+        
+        <div class="form-group" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary btn-block">Actualizar Registro</button>
+        </div>
+    </form>
+</div>
+<% } %>
+
+<%- include('partials/footer') %>

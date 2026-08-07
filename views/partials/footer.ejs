@@ -1,0 +1,23 @@
+            </main> <!-- Close .container -->
+            
+            <footer class="footer">
+                <p>&copy; <%= new Date().getFullYear() %> Grifos Center. Todos los derechos reservados.</p>
+            </footer>
+        </div> <!-- Close .main-content -->
+    </div> <!-- Close .app-container -->
+    
+    <script src="/js/carrito.js"></script>
+    <script>
+        // Simple script to set active state on sidebar items
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentPath = window.location.pathname;
+            const menuItems = document.querySelectorAll('.sidebar-item');
+            menuItems.forEach(item => {
+                if(item.getAttribute('href') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

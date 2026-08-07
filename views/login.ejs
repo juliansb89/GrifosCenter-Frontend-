@@ -1,0 +1,124 @@
+<%- include('partials/header') %>
+
+<div class="login-page-wrapper">
+    <div class="login-glass-card animate-fade-in-up">
+        <div class="login-header">
+            <h2 class="glass-title">💧 Grifos Center</h2>
+            <p class="glass-subtitle" id="subtitleText">Bienvenido a la plataforma premium.</p>
+        </div>
+        
+        <% if (error) { %>
+            <div class="alert alert-error" style="background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.5); color: #fee2e2;">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <!-- Tab Switcher -->
+        <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 1rem;">
+            <button onclick="toggleForm('login')" id="tab-login" style="flex: 1; background: none; border: none; color: white; font-weight: bold; font-size: 1.1rem; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Iniciar Sesión</button>
+            <button onclick="toggleForm('register')" id="tab-register" style="flex: 1; background: none; border: none; color: rgba(255,255,255,0.6); font-weight: normal; font-size: 1.1rem; cursor: pointer; transition: 0.3s;">Registrarse</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form action="/login" method="POST" class="form" id="form-login">
+            <div class="form-group">
+                <label for="email" class="glass-label">Correo Electrónico</label>
+                <input type="email" id="email" name="email" required placeholder="tu@correo.com" class="glass-input">
+            </div>
+            <div class="form-group">
+                <label for="password" class="glass-label">Contraseña</label>
+                <input type="password" id="password" name="password" required placeholder="••••••••" class="glass-input">
+            </div>
+            <button type="submit" class="btn btn-glass-primary" style="width: 100%; margin-top: 1rem;">Ingresar a la Plataforma</button>
+        </form>
+
+        <!-- REGISTER FORM -->
+        <form action="/register" method="POST" class="form" id="form-register" style="display: none;">
+            <div class="form-group">
+                <label for="reg_nombre" class="glass-label">Nombre Completo</label>
+                <input type="text" id="reg_nombre" name="nombre_completo" required placeholder="Ej: Juan Pérez" class="glass-input">
+            </div>
+            <div class="form-group">
+                <label for="reg_email" class="glass-label">Correo Electrónico</label>
+                <input type="email" id="reg_email" name="email" required placeholder="tu@correo.com" class="glass-input">
+            </div>
+            <div class="form-group">
+                <label for="reg_password" class="glass-label">Contraseña</label>
+                <input type="password" id="reg_password" name="password" required placeholder="Crea una contraseña segura" class="glass-input">
+            </div>
+            <div class="form-group">
+                <label for="reg_tipo" class="glass-label">Tipo de Usuario</label>
+                <select id="reg_tipo" name="tipo" class="glass-input" onchange="toggleAdminKey()" style="background: rgba(255,255,255,0.1); color: white;">
+                    <option style="color: black;" value="Cliente">Soy Cliente</option>
+                    <option style="color: black;" value="Empleado">Soy Empleado</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="admin_key_group" style="display: none;">
+                <label for="clave_admin" class="glass-label" style="color: #fbbf24;">Clave de Administrador (Requerida)</label>
+                <input type="password" id="clave_admin" name="clave_admin" placeholder="Código de autorización" class="glass-input" style="border-color: rgba(251,191,36,0.5);">
+            </div>
+            
+            <button type="submit" class="btn btn-glass-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Crear Cuenta</button>
+        </form>
+        
+        <div class="login-footer" style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="btn-glass-outline">← Volver al Catálogo</a>
+        </div>
+        
+        <script>
+            function toggleForm(type) {
+                const formLogin = document.getElementById('form-login');
+                const formRegister = document.getElementById('form-register');
+                const tabLogin = document.getElementById('tab-login');
+                const tabRegister = document.getElementById('tab-register');
+                const subtitle = document.getElementById('subtitleText');
+
+                if (type === 'login') {
+                    formLogin.style.display = 'block';
+                    formRegister.style.display = 'none';
+                    
+                    tabLogin.style.color = 'white';
+                    tabLogin.style.fontWeight = 'bold';
+                    tabLogin.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+                    
+                    tabRegister.style.color = 'rgba(255,255,255,0.6)';
+                    tabRegister.style.fontWeight = 'normal';
+                    tabRegister.style.textShadow = 'none';
+                    
+                    subtitle.textContent = 'Bienvenido a la plataforma premium.';
+                } else {
+                    formLogin.style.display = 'none';
+                    formRegister.style.display = 'block';
+                    
+                    tabRegister.style.color = 'white';
+                    tabRegister.style.fontWeight = 'bold';
+                    tabRegister.style.textShadow = '0 2px 4px rgba(0,0,0,0.5)';
+                    
+                    tabLogin.style.color = 'rgba(255,255,255,0.6)';
+                    tabLogin.style.fontWeight = 'normal';
+                    tabLogin.style.textShadow = 'none';
+                    
+                    subtitle.textContent = 'Crea tu cuenta para empezar a comprar o trabajar.';
+                }
+            }
+            
+            function toggleAdminKey() {
+                const tipo = document.getElementById('reg_tipo').value;
+                const adminKeyGroup = document.getElementById('admin_key_group');
+                const adminKeyInput = document.getElementById('clave_admin');
+                
+                if (tipo === 'Empleado') {
+                    adminKeyGroup.style.display = 'block';
+                    adminKeyInput.required = true;
+                } else {
+                    adminKeyGroup.style.display = 'none';
+                    adminKeyInput.required = false;
+                    adminKeyInput.value = '';
+                }
+            }
+        </script>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

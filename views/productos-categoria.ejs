@@ -1,0 +1,218 @@
+<%- include('partials/header') %>
+
+<div class="page-header" style="text-align: center; margin-bottom: 2rem;">
+    <h1 class="text-gradient"><%= title %></h1>
+    <p>
+        <a href="/catalogo" class="btn btn-outline btn-sm" style="margin-right: 1rem;">&larr; Volver a Categorías</a>
+        Encuentra lo que buscas en nuestra selección de <%= title.toLowerCase() %>.
+    </p>
+</div>
+
+<!-- Buscador Inteligente -->
+<div style="max-width: 600px; margin: 0 auto 3rem auto; position: relative;">
+    <input type="text" id="searchInputPublic" placeholder="Buscar productos en esta categoría... (Ej: grifo, tina, acero)" onkeyup="filtrarCatalogo()" style="width: 100%; padding: 1rem 1.5rem 1rem 3rem; border-radius: 50px; border: 1px solid var(--border-color); font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s;">
+    <i class="fas fa-search" style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--secondary-color); font-size: 1.2rem;"></i>
+</div>
+
+<div class="catalogo-grid animate-fade-in-up delay-100" id="catalogoGrid">
+    <% if (items && items.length > 0) { %>
+        <% items.forEach((item, index) => { %>
+            <% 
+                // La imagen ahora viene directamente de la base de datos (columna imagen_url)
+                const imageSrc = item.imagen_url && item.imagen_url.trim() !== '' ? item.imagen_url : null;
+
+                // Promedio de estrellas y valoraciones desde la base de datos
+                const rating = parseFloat(item.promedio_estrellas || 0);
+                const reviewsCount = parseInt(item.total_valoraciones || 0);
+                const ratingVisual = rating > 0 ? rating.toFixed(1) : 'Nuevo';
+
+                const isDiscount = index % 3 === 0;
+                const oldPrice = isDiscount ? (item.precio * 1.3).toFixed(2) : null;
+            %>
+            <div class="product-card catalog-searchable" data-search="<%= (item.nombre || '').toLowerCase() %> <%= (item.descripcion || '').toLowerCase() %>">
+                <% if (isDiscount) { %>
+                    <span class="product-badge badge-discount">-30% CYBER</span>
+                <% } else if (rating === 0) { %>
+                    <span class="product-badge badge-new" style="background-color: var(--success);">NUEVO</span>
+                <% } %>
+                
+                <% if (imageSrc) { %>
+                <div class="product-image">
+                    <img src="<%= imageSrc %>" alt="<%= item.nombre %>">
+                </div>
+                <% } else { %>
+                <div class="product-image" style="background-color: #f1f3f5; display: flex; align-items: center; justify-content: center; flex-direction: column; min-height: 200px;">
+                    <span style="font-size: 3rem; color: #ccc;">📸</span>
+                    <p style="color: #999; font-size: 0.8rem; margin-top: 1rem;">Sin Imagen</p>
+                </div>
+                <% } %>
+                
+                <div class="product-info">
+                    <div class="product-rating" style="color: #ffc107; font-size: 0.9rem; margin-bottom: 0.5rem; display: flex; gap: 2px;">
+                        <% for(let i=1; i<=5; i++) { %>
+                            <% if (i <= Math.floor(rating)) { %>
+                                <i class="fas fa-star"></i>
+                            <% } else if (i === Math.ceil(rating) && !Number.isInteger(rating)) { %>
+                                <i class="fas fa-star-half-alt"></i>
+                            <% } else { %>
+                                <i class="far fa-star" style="color: #e9ecef;"></i>
+                            <% } %>
+                        <% } %>
+                        <span style="color: #6c757d; margin-left: 0.5rem; font-size: 0.85rem;"><%= ratingVisual %> (<%= reviewsCount %>)</span>
+                    </div>
+                    
+                    <h3 class="product-title"><%= item.nombre %></h3>
+                    
+                    <div class="product-price-container" style="display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                            <span class="product-price"><%= new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(item.precio) %></span>
+                            <% if (isDiscount) { %>
+                                <span class="product-price-old"><%= new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(oldPrice) %></span>
+                            <% } %>
+                        </div>
+                        <span style="font-size: 0.8rem; color: <%= item.stock > 0 ? '#10b981' : '#ef4444' %>; font-weight: 600; margin-top: 0.2rem;">
+                            <%= item.stock > 0 ? `📦 ${item.stock} disponibles` : '❌ Agotado' %>
+                        </span>
+                    </div>
+                    
+                    <% if (typeof role === 'undefined' || role === null || role === 'Cliente') { %>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <button class="btn-add-cart" onclick="agregarAlCarrito('<%= item.Id_producto || item.id_producto %>', '<%= item.nombre %>', <%= item.precio %>, '<%= imageSrc || '' %>')" style="flex: 2; border-radius: 8px;">
+                            🛒 Añadir
+                        </button>
+                        <button class="btn-add-cart" onclick="abrirModalCalificar('<%= item.Id_producto || item.id_producto %>', '<%= item.nombre %>')" style="flex: 1; background-color: #ffc107; color: #000; border: none; border-radius: 8px; font-weight: bold;">
+                            ⭐ Calificar
+                        </button>
+                    </div>
+                    <% } else { %>
+                    <div style="text-align: center; color: var(--secondary-color); font-size: 0.9rem; padding: 0.5rem; border: 1px dashed var(--secondary-color); border-radius: 6px; background-color: rgba(255,255,255,0.05); margin-top: 1rem;">
+                        👁️ Vista de Empleado (Modo Lectura)
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+            <h2>No hay productos disponibles</h2>
+            <p>Aún no hay productos registrados en esta categoría.</p>
+        </div>
+    <% } %>
+</div>
+
+<!-- Modal para Calificar Producto -->
+<div id="modalCalificar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+        <h3 id="modalProductName" style="margin-bottom: 1rem; color: var(--text-color);">Calificar Producto</h3>
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 2rem; color: #ccc;" id="modalStars">
+            <i class="fas fa-star" style="cursor: pointer;" onclick="setEstrellas(1)"></i>
+            <i class="fas fa-star" style="cursor: pointer;" onclick="setEstrellas(2)"></i>
+            <i class="fas fa-star" style="cursor: pointer;" onclick="setEstrellas(3)"></i>
+            <i class="fas fa-star" style="cursor: pointer;" onclick="setEstrellas(4)"></i>
+            <i class="fas fa-star" style="cursor: pointer;" onclick="setEstrellas(5)"></i>
+        </div>
+        <input type="hidden" id="modalProductId">
+        <input type="hidden" id="modalRatingVal" value="0">
+        
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn btn-outline" onclick="cerrarModalCalificar()">Cancelar</button>
+            <button class="btn btn-primary" onclick="enviarCalificacion()">Enviar Calificación</button>
+        </div>
+    </div>
+</div>
+
+<!-- Añadimos FontAwesome para las estrellas -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    function abrirModalCalificar(id, nombre) {
+        document.getElementById('modalProductId').value = id;
+        document.getElementById('modalProductName').innerText = `Calificar: ${nombre}`;
+        setEstrellas(0);
+        const modal = document.getElementById('modalCalificar');
+        modal.style.display = 'flex';
+    }
+
+    function cerrarModalCalificar() {
+        document.getElementById('modalCalificar').style.display = 'none';
+    }
+
+    function setEstrellas(val) {
+        document.getElementById('modalRatingVal').value = val;
+        const stars = document.getElementById('modalStars').children;
+        for (let i = 0; i < 5; i++) {
+            if (i < val) {
+                stars[i].style.color = '#ffc107'; // Amarillo
+            } else {
+                stars[i].style.color = '#ccc'; // Gris
+            }
+        }
+    }
+
+    async function enviarCalificacion() {
+        const id_producto = document.getElementById('modalProductId').value;
+        const estrellas = document.getElementById('modalRatingVal').value;
+        
+        if(estrellas == 0) {
+            alert('Por favor selecciona al menos 1 estrella.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:3000/api/valoraciones/${id_producto}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id_cliente: 1, // Usuario por defecto para demostración
+                    estrellas: estrellas,
+                    comentario: 'Calificación rápida desde el catálogo'
+                })
+            });
+
+            if(response.ok) {
+                alert('¡Gracias por tu calificación!');
+                cerrarModalCalificar();
+                window.location.reload();
+            } else {
+                const err = await response.json();
+                alert(err.message || 'Error al enviar calificación');
+            }
+        } catch (error) {
+            alert('Error de red al intentar calificar.');
+        }
+    }
+
+    function filtrarCatalogo() {
+        const query = document.getElementById('searchInputPublic').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.catalog-searchable');
+        
+        let hasVisible = false;
+        
+        cards.forEach(card => {
+            const searchData = card.getAttribute('data-search') || '';
+            if (searchData.includes(query)) {
+                card.style.display = 'block'; // Or flex if that's what it was
+                hasVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Opcional: mostrar un mensaje si no hay resultados
+        let emptyState = document.getElementById('searchEmptyState');
+        if (!hasVisible && query !== '') {
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.id = 'searchEmptyState';
+                emptyState.style = 'grid-column: 1 / -1; text-align: center; padding: 4rem;';
+                emptyState.innerHTML = '<h2>No se encontraron resultados</h2><p>Intenta con otras palabras clave.</p>';
+                document.getElementById('catalogoGrid').appendChild(emptyState);
+            }
+            emptyState.style.display = 'block';
+        } else if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

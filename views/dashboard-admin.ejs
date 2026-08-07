@@ -1,0 +1,174 @@
+<%- include('partials/header') %>
+
+<div class="page-header animate-fade-in-up">
+    <h1 class="page-title">Dashboard Administrativo</h1>
+    <p class="page-description">Análisis en tiempo real de ventas, ingresos e inventario.</p>
+</div>
+
+<% 
+    const mesActualIdx = new Date().getMonth();
+    const nombreMes = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][mesActualIdx];
+%>
+
+<% if (faltantes && faltantes.length > 0) { %>
+<div class="alert pulse" style="background-color: var(--danger); color: white; padding: 2rem; border-radius: var(--radius-lg); margin-bottom: 2rem; text-align: center; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);">
+    <h2 style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 2rem; color: white;">
+        <span>🚨</span> ¡ALERTA CRÍTICA DE INVENTARIO! <span>🚨</span>
+    </h2>
+    <p style="font-size: 1.25rem; font-weight: 500; margin-bottom: 1rem; color: white;">
+        Atención: Tienes <%= faltantes.length %> producto(s) por debajo del stock mínimo. 
+        <% if (faltantes.length === 1) { %>
+            El producto <strong>"<%= faltantes[0].nombre %>"</strong> se está agotando. Quedan solo <strong><%= faltantes[0].stock %></strong> unidades.
+        <% } %>
+        Requiere reabastecimiento inmediato.
+    </p>
+    <button onclick="alert('✅ Orden de reabastecimiento enviada automáticamente a proveedores.'); this.innerText = 'Pedido Realizado'; this.disabled = true; this.style.opacity = '0.7';" style="background-color: white; color: var(--danger); border: none; padding: 0.8rem 2rem; font-size: 1.1rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s;">🛒 Hacer Pedido a Proveedor</button>
+</div>
+<% } %>
+
+<div class="bento-grid animate-fade-in-up delay-100">
+    <!-- Ingresos Totales KPI -->
+    <div class="bento-card bento-col-4 bg-gradient-success" style="padding: 2.5rem;">
+        <div class="flex items-center justify-between">
+            <div class="bento-content">
+                <span class="bento-icon" style="font-size: 3rem; margin-bottom: 0.5rem;">💰</span>
+                <h3 style="font-size: 1.5rem;">Ingresos Totales (<%= nombreMes %>)</h3>
+                <p style="font-size: 3.5rem; font-weight: 800; line-height: 1.2; margin-top: 0.5rem; color: white;"><%= new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(ingresos) %></p>
+                <p style="font-size: 1rem; opacity: 0.9;">Generados por ventas completadas este mes</p>
+            </div>
+            <div class="chart-placeholder" style="background: rgba(255,255,255,0.1); border-radius: 50%; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+                📈
+            </div>
+        </div>
+    </div>
+
+    <!-- Archivero Mensual de Ventas -->
+    <div class="card bento-col-4" style="border: none; background: transparent; padding: 0;">
+        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📁</span> Archivero Histórico de Ventas por Mes
+        </h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+            <% if (historialMensual && historialMensual.length > 0) { 
+                const currentDate = new Date();
+                const currentMonth = currentDate.getMonth() + 1;
+                const currentYear = currentDate.getFullYear();
+                const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                
+                // Filtrar para no mostrar el mes actual
+                const historialAnterior = historialMensual.filter(hm => !(hm.anio === currentYear && hm.mes === currentMonth));
+                
+                if (historialAnterior.length > 0) {
+                    historialAnterior.forEach((hm, index) => { 
+                        const nombreMes = meses[hm.mes - 1];
+            %>
+                <div class="folder-card animate-fade-in-up" style="background: linear-gradient(135deg, var(--surface-color) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; position: relative; overflow: hidden; box-shadow: var(--shadow-sm); transition: transform 0.3s ease, box-shadow 0.3s ease; animation-delay: <%= index * 100 %>ms; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: var(--primary-color);"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <span style="font-size: 2.5rem; line-height: 1;">📂</span>
+                        <span class="badge badge-primary"><%= hm.cantidad_ventas %> Ventas</span>
+                    </div>
+                    <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-primary);"><%= nombreMes %> <%= hm.anio %></h4>
+                    <p class="text-gradient" style="font-size: 1.5rem; font-weight: 800; margin: 0;">
+                        <%= new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(hm.total_mes) %>
+                    </p>
+                </div>
+            <%      }) 
+                } else { %>
+                    <div class="text-center bento-col-4" style="padding: 3rem; color: var(--text-secondary); background: var(--surface-color); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                        <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📭</span>
+                        Aún no hay registros de ventas de meses anteriores.
+                    </div>
+            <%  }
+               } else { %>
+                <div class="text-center bento-col-4" style="padding: 3rem; color: var(--text-secondary); background: var(--surface-color); border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+                    <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📭</span>
+                    Aún no hay registros de ventas para archivar.
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Productos Más Vendidos -->
+    <div class="card bento-col-2" style="border: none;">
+        <div class="flex items-center justify-between mb-4">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <span>🏆</span> Top 10 Más Vendidos
+            </h3>
+        </div>
+        
+        <% if (masVendidos && masVendidos.length > 0) { %>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-right">Vendidos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% masVendidos.forEach(p => { %>
+                            <tr>
+                                <td><span style="font-weight: 500;"><%= p.nombre %></span></td>
+                                <td class="text-right"><span class="badge badge-primary"><%= p.total_vendido %> uds</span></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center" style="padding: 2rem; color: var(--text-secondary); background: var(--bg-color); border-radius: var(--radius-md);">
+                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📊</span>
+                No hay datos suficientes de ventas.
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Productos Faltantes (Stock Bajo) -->
+    <div class="card bento-col-2" style="border: none;">
+        <div class="flex items-center justify-between mb-4">
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                <span>⚠️</span> Alertas de Inventario
+            </h3>
+        </div>
+
+        <% if (faltantes && faltantes.length > 0) { %>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-right">Stock Actual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% faltantes.forEach(p => { %>
+                            <tr>
+                                <td><span style="font-weight: 500;"><%= p.nombre %></span></td>
+                                <td class="text-right">
+                                    <span class="badge <%= p.stock == 0 ? 'badge-danger' : 'badge-warning' %>" style="animation: <%= p.stock < 5 ? 'pulse 2s infinite' : 'none' %>;">
+                                        <%= p.stock %> uds
+                                    </span>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center" style="padding: 2rem; color: var(--text-secondary); background: var(--bg-color); border-radius: var(--radius-md);">
+                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">✅</span>
+                El inventario está en óptimas condiciones. No hay productos con stock bajo.
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    50% { transform: scale(1.05); opacity: 0.8; box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+</style>
+<%- include('partials/footer') %>

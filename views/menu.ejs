@@ -1,0 +1,96 @@
+<%- include('partials/header') %>
+
+<div class="page-header animate-fade-in-up">
+    <h1 class="page-title">Bienvenido a Grifos Center</h1>
+    <p class="page-description">Selecciona una opción del panel para comenzar.</p>
+</div>
+
+<div class="bento-grid animate-fade-in-up delay-100">
+    <% if (role && role !== 'Cliente') { %>
+        <!-- Tarjeta Principal (Hero) -->
+        <a href="/productos" class="bento-card bento-col-2 bento-row-2 bg-gradient-primary">
+            <div class="bento-content">
+                <span class="bento-icon">🚿</span>
+                <h3>Gestión de Productos y Servicios</h3>
+                <p>Control total sobre el inventario, precios, stock comercial y categorías de grifería.</p>
+            </div>
+            <div style="text-align: right; margin-top: auto;">
+                <span class="btn" style="background: rgba(255,255,255,0.2); color: white;">Acceder &rarr;</span>
+            </div>
+        </a>
+
+        <!-- Módulo Clientes -->
+        <a href="/clientes-admin" class="bento-card bento-col-2 bg-gradient-success">
+            <div class="bento-content">
+                <span class="bento-icon">🤝</span>
+                <h3>Cartera de Clientes</h3>
+                <p>Administra la base de datos comercial y contactos recurrentes.</p>
+            </div>
+        </a>
+
+        <!-- Módulo Dashboard Administrativo -->
+        <a href="/dashboard-admin" class="bento-card bento-col-2">
+            <div class="bento-content">
+                <span class="bento-icon">📊</span>
+                <h3 style="color: var(--text-primary);">Dashboard Administrativo</h3>
+                <p style="color: var(--text-secondary);">Análisis de reportes, ventas, ingresos y KPIs de inventario.</p>
+            </div>
+        </a>
+
+        <a href="/facturacion" class="bento-card" style="text-align: center; align-items: center; justify-content: center;">
+            <span class="bento-icon" style="margin-bottom: 0.5rem;">🧾</span>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Facturación</h3>
+        </a>
+
+        <a href="/usuarios" class="bento-card" style="text-align: center; align-items: center; justify-content: center;">
+            <span class="bento-icon" style="margin-bottom: 0.5rem;">👥</span>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Usuarios</h3>
+        </a>
+
+        <a href="/cupones" class="bento-card" style="text-align: center; align-items: center; justify-content: center; border: 2px dashed var(--primary-color);">
+            <span class="bento-icon" style="margin-bottom: 0.5rem; color: var(--primary-color);">🎟️</span>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Cupones</h3>
+        </a>
+
+        <a href="/empleados" class="bento-card bento-col-2 bg-gradient-warning">
+            <div class="bento-content">
+                <span class="bento-icon">👔</span>
+                <h3>Personal (RRHH)</h3>
+                <p>Administra al personal interno de la empresa y roles operativos.</p>
+            </div>
+        </a>
+    <% } %>
+
+    <% if (role === 'Cliente') { %>
+        <a href="/catalogo" class="bento-card bento-col-2 bento-row-2 bg-gradient-primary">
+            <div class="bento-content">
+                <span class="bento-icon">✨</span>
+                <h3>Catálogo Premium</h3>
+                <p>Descubre nuestra colección exclusiva de grifería moderna para tu hogar. Explora lavamanos, duchas y accesorios.</p>
+            </div>
+            <div style="text-align: right; margin-top: auto;">
+                <span class="btn" style="background: rgba(255,255,255,0.2); color: white;">Explorar &rarr;</span>
+            </div>
+        </a>
+
+        <a href="/categorias" class="bento-card bento-col-2 bg-gradient-success">
+            <div class="bento-content">
+                <span class="bento-icon">🛁</span>
+                <h3>Categorías</h3>
+                <p>Lavamanos, duchas, cocina y accesorios de lujo por separado.</p>
+            </div>
+        </a>
+
+        <a href="/mis-facturas" class="bento-card" style="text-align: center; align-items: center; justify-content: center;">
+            <span class="bento-icon" style="margin-bottom: 0.5rem;">🧾</span>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Mis Compras</h3>
+        </a>
+
+        <a href="/soporte" class="bento-card" style="text-align: center; align-items: center; justify-content: center;">
+            <span class="bento-icon" style="margin-bottom: 0.5rem;">🛠️</span>
+            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Soporte Técnico</h3>
+        </a>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
