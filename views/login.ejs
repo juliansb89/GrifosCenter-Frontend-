@@ -46,18 +46,7 @@
                 <label for="reg_password" class="glass-label">Contraseña</label>
                 <input type="password" id="reg_password" name="password" required placeholder="Crea una contraseña segura" class="glass-input">
             </div>
-            <div class="form-group">
-                <label for="reg_tipo" class="glass-label">Tipo de Usuario</label>
-                <select id="reg_tipo" name="tipo" class="glass-input" onchange="toggleAdminKey()" style="background: rgba(255,255,255,0.1); color: white;">
-                    <option style="color: black;" value="Cliente">Soy Cliente</option>
-                    <option style="color: black;" value="Empleado">Soy Empleado</option>
-                </select>
-            </div>
-            
-            <div class="form-group" id="admin_key_group" style="display: none;">
-                <label for="clave_admin" class="glass-label" style="color: #fbbf24;">Clave de Administrador (Requerida)</label>
-                <input type="password" id="clave_admin" name="clave_admin" placeholder="Código de autorización" class="glass-input" style="border-color: rgba(251,191,36,0.5);">
-            </div>
+            <input type="hidden" name="tipo" value="Cliente">
             
             <button type="submit" class="btn btn-glass-primary" style="width: 100%; margin-top: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Crear Cuenta</button>
         </form>
@@ -99,24 +88,11 @@
                     tabLogin.style.fontWeight = 'normal';
                     tabLogin.style.textShadow = 'none';
                     
-                    subtitle.textContent = 'Crea tu cuenta para empezar a comprar o trabajar.';
+                    subtitle.textContent = 'Crea tu cuenta para empezar a comprar.';
                 }
             }
             
-            function toggleAdminKey() {
-                const tipo = document.getElementById('reg_tipo').value;
-                const adminKeyGroup = document.getElementById('admin_key_group');
-                const adminKeyInput = document.getElementById('clave_admin');
-                
-                if (tipo === 'Empleado') {
-                    adminKeyGroup.style.display = 'block';
-                    adminKeyInput.required = true;
-                } else {
-                    adminKeyGroup.style.display = 'none';
-                    adminKeyInput.required = false;
-                    adminKeyInput.value = '';
-                }
-            }
+
         </script>
     </div>
 </div>
