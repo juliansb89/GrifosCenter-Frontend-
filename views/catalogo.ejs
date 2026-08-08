@@ -43,11 +43,11 @@
         <% categorias.forEach(cat => { 
             // Asignar imágenes locales según el ID de la categoría
             let catImg = '/img/cat_lavamanos.png'; // Imagen por defecto
-            if (cat.id_categoria == 1) catImg = '/img/bathtub_spa.png';
-            if (cat.id_categoria == 2) catImg = '/img/cat_cocinas.png';
-            if (cat.id_categoria == 3) catImg = '/img/cat_accesorios.png';
-            if (cat.id_categoria == 4) catImg = '/img/cat_banos.png';
-            if (cat.id_categoria == 5) catImg = '/img/Extractor.jpeg';
+            if (cat.id_categoria == 1) catImg = '/img/bathtub_spa.png'; // Grifos
+            if (cat.id_categoria == 2) catImg = '/img/cat_cocinas.png'; // Cocina
+            if (cat.id_categoria == 3) catImg = '/img/cat_banos.png'; // Tinas y Spas
+            if (cat.id_categoria == 4) catImg = '/img/cat_accesorios.png'; // Accesorios
+            if (cat.id_categoria == 5) catImg = '/img/Extractor.jpeg'; // Eléctricos
         %>
             <a href="/categoria/<%= cat.id_categoria %>" class="product-card catalog-category-searchable" data-search="<%= (cat.nombre || '').toLowerCase() %> <%= (cat.descripcion || '').toLowerCase() %>" style="text-decoration: none; display: block;">
                 <div class="product-image" style="height: 280px; overflow: hidden;">
